@@ -287,7 +287,7 @@
             container.innerHTML = data.map(f => `
                 <div class="col-lg-3 col-md-6">
                     <div class="glass-card text-center p-4 h-100">
-                        <img src="${f.image_url || 'https://via.placeholder.com/150'}" alt="${f.name}" class=" mb-3 border border-3" style="width:120px; height:120px; object-fit:cover; border-color:var(--theme-primary)!important; border-radius: 50%;">
+                        <img src="${f.image_url || 'assets/images/avatar-placeholder.svg'}" alt="${f.name}" class=" mb-3 border border-3" style="width:120px; height:120px; object-fit:cover; border-color:var(--theme-primary)!important; border-radius: 50%;" onerror="this.onerror=null;this.src='assets/images/avatar-placeholder.svg';">
                         <h5 class="mb-1" style="color:var(--text-dark-maroon);">${f.name}</h5>
                         <p class="text-primary small mb-2">${f.designation}, ${f.department}</p>
                         <p class="text-muted small mb-3">Academic Excellence & Research Focus</p>
