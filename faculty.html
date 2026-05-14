@@ -232,6 +232,7 @@
         async function loadFaculties() {
             try {
                 const response = await fetch('/api/faculties');
+                if (!response.ok) throw new Error(`API returned ${response.status}`);
                 const faculties = await response.json();
                 const container = document.getElementById('faculty-container');
                 

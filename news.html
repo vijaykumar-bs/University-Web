@@ -319,6 +319,7 @@
 
             try {
                 const response = await fetch('/api/posts');
+                if (!response.ok) throw new Error(`API returned ${response.status}`);
                 const posts = await response.json();
                 renderPosts(posts);
             } catch (error) {

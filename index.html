@@ -679,6 +679,7 @@
             
             try {
                 const res = await fetch('/api/reviews');
+                if (!res.ok) throw new Error(`API returned ${res.status}`);
                 const reviews = await res.json();
                 
                 if (!reviews || reviews.length === 0) {
