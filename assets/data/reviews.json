@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "student_name": "Ananya R",
+    "rating": 5,
+    "comment": "Amazing campus and truly supportive faculty. The research environment is inspiring.",
+    "image_url": ""
+  },
+  {
+    "id": 2,
+    "student_name": "Rahul S",
+    "rating": 4,
+    "comment": "I loved the hands-on labs and mentorship from industry experts. Very well organized.",
+    "image_url": ""
+  },
+  {
+    "id": 3,
+    "student_name": "Megha P",
+    "rating": 5,
+    "comment": "The student community is welcoming, and the programs are very forward-looking.",
+    "image_url": ""
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "title": "ABC University Research Expo 2026",
+    "content": "Our students and faculty showcased cutting-edge projects at the annual research expo, focused on sustainable technology and AI-driven health solutions.",
+    "image_url": "https://via.placeholder.com/600x400?text=Research+Expo",
+    "category": "Research",
+    "view_count": 124,
+    "event_date": "2026-11-02T10:00:00Z",
+    "is_upcoming": true
+  },
+  {
+    "id": 2,
+    "title": "Global Innovation Summit",
+    "content": "International delegates joined ABC University for a symposium on innovation, entrepreneurship, and community impact.",
+    "image_url": "https://via.placeholder.com/600x400?text=Innovation+Summit",
+    "category": "Events",
+    "view_count": 98,
+    "event_date": "2026-11-18T09:00:00Z",
+    "is_upcoming": true
+  },
+  {
+    "id": 3,
+    "title": "New AI Lab Launch",
+    "content": "ABC University launched its advanced AI research laboratory, enabling new collaborations in machine learning and robotics.",
+    "image_url": "https://via.placeholder.com/600x400?text=AI+Lab",
+    "category": "Announcements",
+    "view_count": 180,
+    "event_date": "2026-10-15T08:00:00Z",
+    "is_upcoming": false
+  }
+]
