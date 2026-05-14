@@ -41,7 +41,7 @@ function initChatbot() {
         <style>
             .chatbot-container {
                 position: fixed;
-                bottom: 30px;
+                bottom: 80px;
                 right: 30px;
                 z-index: 100000;
                 font-family: 'Outfit', sans-serif;
