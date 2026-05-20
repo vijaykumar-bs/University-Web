@@ -1,0 +1,9 @@
+{
+  "name": "abc-university-static-site",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "description": "Static ABC University demo site for GitHub Pages hosting."
+}

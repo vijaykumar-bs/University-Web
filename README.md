@@ -1,30 +1,14 @@
-# Vijay University Web Portal
+# ABC University Website
 
-A comprehensive university web portal including frontend pages and a Node.js/MySQL backend.
+Static demo website for ABC University, prepared for GitHub Pages hosting.
 
-## Features
-- Dynamic News and Faculty sections
-- Admissions and Program details
-- Admin Dashboard
-- Responsive design
+## What is included
 
-## Tech Stack
-- **Frontend**: HTML5, CSS3, JavaScript
-- **Backend**: Node.js, Express
-- **Database**: MySQL
-
-## Setup
-1. Clone the repository
-2. Install dependencies for the backend:
-   ```bash
-   cd backend
-   npm install
-   ```
-3. Configure environment variables in `backend/.env`
-4. Start the backend:
-   ```bash
-   node server.js
-   ```
+- Responsive static HTML pages
+- Dummy/sample data for news, faculty, reviews, courses, applications, enquiries, and placement stories
+- Browser-only mock API in `assets/js/static-api.js`
+- No backend server, database, secrets, uploads, or `node_modules`
 
 ## Hosting
-The frontend is hosted on GitHub Pages.
+
+This repo is ready for GitHub Pages. Set Pages source to the `main` branch and root folder.

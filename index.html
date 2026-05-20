@@ -32,33 +32,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="assets/css/style.css" rel="stylesheet">
+    <script src="assets/js/static-api.js"></script>
 </head>
 <body class="d-flex flex-column min-vh-100 theme-default">
-
-    <!-- Floating Contact Bar -->
-    <div class="floating-contact-bar">
-        <a href="tel:+918762996815" class="contact-item">
-            <div class="icon-container"><i class="bi bi-telephone-fill"></i></div>
-            <div class="contact-info">
-                <span class="contact-label">Call Us Today</span>
-                <span class="contact-detail">+918762996815</span>
-            </div>
-        </a>
-        <a href="mailto:info@abcuniversity.edu.in" class="contact-item">
-            <div class="icon-container"><i class="bi bi-envelope-at-fill"></i></div>
-            <div class="contact-info">
-                <span class="contact-label">Email Us</span>
-                <span class="contact-detail">info@abcuniversity.edu.in</span>
-            </div>
-        </a>
-        <a href="https://wa.me/918762996815" class="contact-item">
-            <div class="icon-container"><i class="bi bi-whatsapp"></i></div>
-            <div class="contact-info">
-                <span class="contact-label">WhatsApp</span>
-                <span class="contact-detail">+918762996815</span>
-            </div>
-        </a>
-    </div>
 
         <!-- Sticky Navigation (Mega Menu) -->
     
@@ -81,9 +57,6 @@
     
     
     
-    
-    
-            <!-- Sticky Navigation (Mega Menu) -->
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container position-relative">
             <a class="navbar-brand d-flex align-items-center" href="index.html">
@@ -147,29 +120,19 @@
                             <li><a class="dropdown-item" href="admissions.html">Fee Structure</a></li>
                         </ul>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Campus</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="campus-life.html">Campus Life</a></li>
-                            <li><a class="dropdown-item" href="governance.html">Governance</a></li>
-                            <li><a class="dropdown-item" href="student-services.html">Student Services</a></li>
-                        </ul>
-                    </li>
                     <li class="nav-item"><a class="nav-link " href="placements.html">Placements</a></li>
                     <li class="nav-item"><a class="nav-link " href="faculty.html">Faculty</a></li>
                     <li class="nav-item"><a class="nav-link " href="research.html">Research</a></li>
                     <li class="nav-item"><a class="nav-link " href="alumni.html">Alumni</a></li>
                     <li class="nav-item"><a class="nav-link " href="news.html">News & Blogs</a></li>
                 </ul>
-                <div class="navbar-actions d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-3">
                     <div id="google_translate_element"></div>
                     <a href="apply.html" class="btn btn-primary-custom ">Apply Now</a>
                 </div>
             </div>
         </div>
     </nav>
-    </div>
-
 
 
 
@@ -373,7 +336,7 @@
                             <div class="event-content-block">
                                 <h5 class="fw-bold">Global Tech Symposium 2026</h5>
                                 <p class="small text-muted mb-3">Join industry leaders and tech pioneers as they discuss the future of AI and technology...</p>
-                                <a href="news.html" class="btn btn-outline-dark btn-sm rounded-0 px-4">View Details</a>
+                                <a href="#" class="btn btn-outline-dark btn-sm rounded-0 px-4">View Details</a>
                             </div>
                         </div>
                         <div class="event-card-horizontal">
@@ -381,7 +344,7 @@
                             <div class="event-content-block">
                                 <h5 class="fw-bold">Grand Alumni Reunion</h5>
                                 <p class="small text-muted mb-3">Welcoming our global alumni back to campus for a night of nostalgia and networking...</p>
-                                <a href="news.html" class="btn btn-maroon btn-sm rounded-0 px-4">View Details</a>
+                                <a href="#" class="btn btn-maroon btn-sm rounded-0 px-4">View Details</a>
                             </div>
                         </div>
                         <div class="event-card-horizontal">
@@ -389,7 +352,7 @@
                             <div class="event-content-block">
                                 <h5 class="fw-bold">International Yoga Festival</h5>
                                 <p class="small text-muted mb-3">Celebrate the ancient wisdom of yoga with practitioners from around the globe...</p>
-                                <a href="news.html" class="btn btn-outline-dark btn-sm rounded-0 px-4">View Details</a>
+                                <a href="#" class="btn btn-outline-dark btn-sm rounded-0 px-4">View Details</a>
                             </div>
                         </div>
                     </div>
@@ -402,15 +365,6 @@
         async function loadUpcomingEvents() {
             const container = document.getElementById('upcoming-events-list');
             
-            // Check if running via file:// protocol
-            if (window.location.protocol === 'file:') {
-                console.warn('Running via file protocol. Fetch might be blocked.');
-                const warningDiv = document.createElement('div');
-                warningDiv.className = 'alert alert-warning m-2 small py-2';
-                warningDiv.innerHTML = '<i class="bi bi-info-circle me-2"></i><strong>Note:</strong> You are viewing this via "file://". For real-time dashboard updates, please use <a href="http://localhost:5500" class="alert-link">http://localhost:5500</a>';
-                container.prepend(warningDiv);
-            }
-
             try {
                 // Add timestamp to prevent browser caching
                 const response = await fetch(`/api/posts?is_upcoming=1&limit=3&_t=${Date.now()}`, {
@@ -443,32 +397,6 @@
                 }
             } catch (error) {
                 console.log('Server not connected, keeping static events.');
-                try {
-                    const fallbackRes = await fetch('assets/data/posts.json');
-                    const fallbackPosts = await fallbackRes.json();
-                    const upcoming = fallbackPosts.filter(item => item.is_upcoming).slice(0, 3);
-                    if (upcoming.length > 0) {
-                        const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-                        container.innerHTML = upcoming.map((event, index) => {
-                            const dateObj = event.event_date ? new Date(event.event_date) : new Date();
-                            const isMaroon = (index === 1);
-                            return `
-                                <div class="event-card-horizontal">
-                                    <div class="event-date-block" style="background: ${isMaroon ? 'var(--heritage-maroon)' : '#222'};">
-                                        <span class="date-num">${dateObj.getDate()}</span>
-                                        <span class="date-month">${months[dateObj.getMonth()]}</span>
-                                    </div>
-                                    <div class="event-content-block">
-                                        <h5 class="fw-bold">${event.title}</h5>
-                                        <p class="small text-muted mb-3">${event.content.substring(0, 100)}...</p>
-                                        <a href="news.html?id=${event.id}" class="btn ${isMaroon ? 'btn-maroon' : 'btn-outline-dark'} btn-sm rounded-0 px-4">View Details</a>
-                                    </div>
-                                </div>`;
-                        }).join('');
-                    }
-                } catch (fallbackError) {
-                    console.error('Error loading fallback upcoming events:', fallbackError);
-                }
             }
         }
         document.addEventListener('DOMContentLoaded', loadUpcomingEvents);
@@ -673,13 +601,14 @@
     </style>
 
     <script>
+        const apiUrl = (path) => path;
+
         async function loadHomeReviews() {
             const container = document.getElementById('home-reviews-container');
             if (!container) return;
             
             try {
-                const res = await fetch('/api/reviews');
-                if (!res.ok) throw new Error(`API returned ${res.status}`);
+                const res = await fetch(apiUrl('/api/reviews'));
                 const reviews = await res.json();
                 
                 if (!reviews || reviews.length === 0) {
@@ -715,47 +644,16 @@
                 `).join('');
             } catch (error) {
                 console.error('Error loading reviews:', error);
-                try {
-                    const fallbackRes = await fetch('assets/data/reviews.json');
-                    const reviews = await fallbackRes.json();
-                    if (!reviews || reviews.length === 0) {
-                        container.innerHTML = '<div class="text-center text-muted w-100"><p>No reviews yet.</p></div>';
-                        return;
-                    }
-
-                    const displayReviews = [...reviews, ...reviews];
-                    container.innerHTML = displayReviews.map(r => `
-                        <div class="review-card-fixed">
-                            <div class="glass-card p-4 h-100 border shadow-sm" style="background: rgba(255,255,255,0.9);">
-                                <div class="d-flex mb-3 text-warning">
-                                    ${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}
-                                </div>
-                                <p class="mb-4" style="font-style: italic; color: #555; font-size: 0.95rem; min-height: 80px;">"${r.comment}"</p>
-                                <div class="d-flex align-items-center">
-                                    ${r.image_url ? `
-                                        <img src="${r.image_url}" class="rounded-circle me-3" width="40" height="40" style="object-fit:cover;">
-                                    ` : `
-                                        <div class="rounded-circle text-white d-flex align-items-center justify-content-center me-3" style="width:40px; height:40px; background: linear-gradient(135deg, #800000, #4A0F0F); font-weight:bold;">
-                                            ${r.student_name.charAt(0)}
-                                        </div>
-                                    `}
-                                    <div>
-                                        <h6 class="mb-0 fw-bold" style="font-size: 0.9rem;">${r.student_name}</h6>
-                                        <small class="text-muted" style="font-size: 0.75rem;">Verified Student</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                } catch (fallbackError) {
-                    console.error('Error loading fallback reviews:', fallbackError);
-                    container.innerHTML = '<div class="text-center text-muted w-100"><p>No reviews available.</p></div>';
-                }
             }
         }
 
         document.getElementById('reviewSubmissionForm').onsubmit = async (e) => {
             e.preventDefault();
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.textContent;
+            submitButton.disabled = true;
+            submitButton.textContent = 'Submitting...';
+
             const formData = new FormData();
             formData.append('student_name', document.getElementById('revName').value);
             formData.append('rating', document.getElementById('revRating').value);
@@ -767,16 +665,27 @@
             }
 
             try {
-                const res = await fetch('/api/reviews', {
+                const res = await fetch(apiUrl('/api/reviews'), {
                     method: 'POST',
                     body: formData
                 });
-                if (res.ok) {
-                    alert('Review submitted! It will appear once approved by admin.');
-                    e.target.reset();
-                    bootstrap.Collapse.getInstance(document.getElementById('reviewFormCollapse')).hide();
+
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    throw new Error(data.error || data.message || 'Unable to submit review');
                 }
-            } catch (err) { alert('Error submitting review'); }
+
+                if (res.ok) {
+                    alert('Your review submitted');
+                    e.target.reset();
+                    bootstrap.Collapse.getOrCreateInstance(document.getElementById('reviewFormCollapse')).hide();
+                }
+            } catch (err) {
+                alert(err.message || 'Error submitting review');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            }
         };
 
         loadHomeReviews();
@@ -906,10 +815,5 @@
     <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
     <script src="assets/js/counter-animation.js"></script>
-    <!-- Fullscreen Menu Logic -->
-    
-
-    
-        <script src="assets/js/ai-chatbot.js"></script>
 </body>
 </html>

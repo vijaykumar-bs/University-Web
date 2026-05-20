@@ -111,4 +111,52 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // 5. Collapse mobile navbar after clicking a top-level link
+    (function collapseMobileNavOnLinkClick(){
+        const mainNavEl = document.getElementById('mainNav');
+        if (!mainNavEl || typeof bootstrap === 'undefined') return;
+        // Create a collapse instance without toggling
+        let bsCollapse;
+        try { bsCollapse = bootstrap.Collapse.getInstance(mainNavEl) || new bootstrap.Collapse(mainNavEl, {toggle:false}); } catch(e){ bsCollapse = new bootstrap.Collapse(mainNavEl, {toggle:false}); }
+
+        const shouldIgnore = (href) => {
+            if (!href) return true;
+            href = href.toLowerCase();
+            if (href.includes('sitemap.html')) return true;
+            if (href.includes('/admin/') || href.includes('admin/')) return true;
+            return false;
+        };
+
+        mainNavEl.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const href = link.getAttribute('href') || '';
+                const text = (link.textContent || '').trim().toLowerCase();
+
+                // Mobile-specific remapping
+                if (window.innerWidth <= 991) {
+                    // Academics -> academics overview page
+                    if (text.includes('academics')) {
+                        e.preventDefault();
+                        try { bsCollapse.hide(); } catch(err) {}
+                        window.location.href = 'academics.html';
+                        return;
+                    }
+                    // Admissions -> apply page
+                    if (text.includes('admissions')) {
+                        e.preventDefault();
+                        try { bsCollapse.hide(); } catch(err) {}
+                        window.location.href = 'apply.html';
+                        return;
+                    }
+                }
+
+                // If link opens a dropdown (has dropdown-toggle) or is excluded, don't collapse here
+                if (link.classList.contains('dropdown-toggle')) return;
+                if (shouldIgnore(href)) return;
+                if (window.innerWidth <= 991) {
+                    try { bsCollapse.hide(); } catch(err) { /* ignore */ }
+                }
+            });
+        });
+    })();
 });

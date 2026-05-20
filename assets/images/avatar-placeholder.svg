@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Faculty placeholder">
-  <rect width="120" height="120" rx="20" ry="20" fill="#f9f4f2"/>
-  <circle cx="60" cy="40" r="26" fill="#800000"/>
-  <path d="M30 100c0-22 18-40 40-40s40 18 40 40" fill="#800000"/>
-  <path d="M40 78c0-12 10-22 22-22s22 10 22 22" fill="#f9f4f2"/>
-</svg>

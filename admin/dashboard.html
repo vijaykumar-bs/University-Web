@@ -38,6 +38,7 @@
         .btn-maroon { background: #800000; color: white; border: none; }
         .btn-maroon:hover { background: #600000; color: white; }
     </style>
+    <script src="../assets/js/static-api.js"></script>
 </head>
 <body>
 
@@ -198,7 +199,6 @@
                                 <th>Student</th>
                                 <th>Rating</th>
                                 <th>Comment</th>
-                                <th>AI Sentiment</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -357,10 +357,34 @@
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const API_BASE = '/api';
+        const API_BASE = window.location.origin + '/api';
         let token = localStorage.getItem('adminToken');
         let allFaculties = [];
         let allCourses = [];
+
+        function getAuthHeaders(extra = {}) {
+            const headers = { ...extra };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            return headers;
+        }
+
+        async function authFetch(url, options = {}) {
+            options.headers = getAuthHeaders(options.headers || {});
+            const res = await fetch(url, options);
+            if (res.status === 401 || res.status === 403) {
+                handleAuthError();
+                throw new Error('Authentication required');
+            }
+            return res;
+        }
+
+        function handleAuthError() {
+            token = null;
+            localStorage.removeItem('adminToken');
+            document.getElementById('dashboard-screen').classList.remove('active');
+            document.getElementById('login-screen').classList.add('active');
+            showToast('Session expired or login required. Please sign in again.', 'danger');
+        }
 
         // const token = localStorage.getItem('adminToken'); // Handled by auth init at bottom
 
@@ -381,84 +405,140 @@
 
         // Applications
         async function loadApplications() {
-            const res = await fetch(`${API_BASE}/applications`, { headers: { 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            document.getElementById('applications-table').innerHTML = data.map(app => `
-                <tr>
-                    <td>#${app.id}</td>
-                    <td><div class="fw-bold">${app.first_name} ${app.last_name}</div><small class="text-muted">${app.email}</small></td>
-                    <td>${app.course}</td>
-                    <td>${app.phone}</td>
-                    <td><span class="status-badge status-${app.status.toLowerCase()}">${app.status}</span></td>
-                    <td>${new Date(app.created_at).toLocaleDateString()}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-success" onclick="updateAppStatus(${app.id}, 'Approved')">Approve</button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="updateAppStatus(${app.id}, 'Rejected')">Reject</button>
-                    </td>
-                </tr>
-            `).join('');
+            try {
+                const res = await authFetch(`${API_BASE}/applications`);
+                const data = await res.json();
+                if (!Array.isArray(data) || data.length === 0) {
+                    document.getElementById('applications-table').innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No applications found.</td></tr>';
+                    return;
+                }
+                // Filter out rejected applications - show only Pending and Approved
+                const filteredData = data.filter(app => app.status !== 'Rejected');
+                
+                if (filteredData.length === 0) {
+                    document.getElementById('applications-table').innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No active applications.</td></tr>';
+                    return;
+                }
+                
+                document.getElementById('applications-table').innerHTML = filteredData.map(app => `
+                    <tr>
+                        <td>#${app.id}</td>
+                        <td><div class="fw-bold">${app.first_name} ${app.last_name}</div><small class="text-muted">${app.email}</small></td>
+                        <td>${app.course}</td>
+                        <td>${app.phone}</td>
+                        <td><span class="status-badge status-${app.status.toLowerCase()}">${app.status}</span></td>
+                        <td>${new Date(app.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-success" onclick="updateAppStatus(${app.id}, 'Approved')">Approve</button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="updateAppStatus(${app.id}, 'Rejected')">Reject</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Load applications error:', err);
+                document.getElementById('applications-table').innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">Unable to load applications. Please sign in again.</td></tr>';
+            }
         }
         async function updateAppStatus(id, status) {
-            await fetch(`${API_BASE}/applications/${id}`, {
-                method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ status })
-            });
-            loadApplications();
+            try {
+                await authFetch(`${API_BASE}/applications/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+                loadApplications();
+            } catch (err) {
+                console.error('Update application status error:', err);
+            }
         }
 
         // Enquiries
         async function loadEnquiries() {
-            const res = await fetch(`${API_BASE}/enquiries`, { headers: { 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            document.getElementById('enquiries-table').innerHTML = data.map(e => `
-                <tr>
-                    <td><div class="fw-bold">${e.name}</div></td>
-                    <td><div>${e.email}</div><small class="text-muted">${e.phone}</small></td>
-                    <td><div style="max-width:300px;">${e.message}</div></td>
-                    <td>${new Date(e.created_at).toLocaleDateString()}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteEnquiry(${e.id})"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
+            try {
+                const res = await authFetch(`${API_BASE}/enquiries`);
+                const data = await res.json();
+                if (!Array.isArray(data) || data.length === 0) {
+                    document.getElementById('enquiries-table').innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No enquiries found.</td></tr>';
+                    return;
+                }
+                document.getElementById('enquiries-table').innerHTML = data.map(e => `
+                    <tr>
+                        <td><div class="fw-bold">${e.name}</div></td>
+                        <td><div>${e.email}</div><small class="text-muted">${e.phone}</small></td>
+                        <td><div style="max-width:300px;">${e.message}</div></td>
+                        <td>${new Date(e.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteEnquiry(${e.id})"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Load enquiries error:', err);
+                document.getElementById('enquiries-table').innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4">Unable to load enquiries. Please sign in again.</td></tr>';
+            }
         }
         async function deleteEnquiry(id) {
-            if(confirm('Delete enquiry?')) {
-                await fetch(`${API_BASE}/enquiries/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-                loadEnquiries();
+            if (confirm('Delete enquiry?')) {
+                try {
+                    await authFetch(`${API_BASE}/enquiries/${id}`, { method: 'DELETE' });
+                    loadEnquiries();
+                } catch (err) {
+                    console.error('Delete enquiry error:', err);
+                }
             }
         }
 
         // Placement Stories
         async function loadPlacementStories() {
-            const res = await fetch(`${API_BASE}/placement-stories?all=true`, { headers: { 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            document.getElementById('stories-table').innerHTML = data.map(s => `
-                <tr>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <img src="${s.image_url || 'https://via.placeholder.com/50'}" class="rounded-circle me-2" width="40" height="40" style="object-fit:cover;">
-                            <div><div class="fw-bold">${s.student_name}</div><small class="text-muted">${s.course}</small></div>
-                        </div>
-                    </td>
-                    <td><div class="fw-bold">${s.company}</div><small class="text-muted">${s.package || ''}</small></td>
-                    <td><div style="max-width:300px; font-size:12px;">${s.story}</div></td>
-                    <td><span class="status-badge status-${s.status.toLowerCase()}">${s.status}</span></td>
-                    <td>
-                        ${s.status === 'Pending' ? `<button class="btn btn-sm btn-success" onclick="updateStoryStatus(${s.id}, 'Approved')">Approve</button>` : ''}
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteStory(${s.id})"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
+            try {
+                const res = await authFetch(`${API_BASE}/placement-stories?all=true`);
+                const data = await res.json();
+                if (!Array.isArray(data) || data.length === 0) {
+                    document.getElementById('stories-table').innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No stories found.</td></tr>';
+                    return;
+                }
+                document.getElementById('stories-table').innerHTML = data.map(s => `
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="${s.image_url || 'https://via.placeholder.com/50'}" class="rounded-circle me-2" width="40" height="40" style="object-fit:cover;">
+                                <div><div class="fw-bold">${s.student_name}</div><small class="text-muted">${s.course}</small></div>
+                            </div>
+                        </td>
+                        <td><div class="fw-bold">${s.company}</div><small class="text-muted">${s.package || ''}</small></td>
+                        <td><div style="max-width:300px; font-size:12px;">${s.story}</div></td>
+                        <td><span class="status-badge status-${s.status.toLowerCase()}">${s.status}</span></td>
+                        <td>
+                            ${s.status === 'Pending' ? `<button class="btn btn-sm btn-success" onclick="updateStoryStatus(${s.id}, 'Approved')">Approve</button>` : ''}
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStory(${s.id})"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Load stories error:', err);
+                document.getElementById('stories-table').innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4">Unable to load stories. Please sign in again.</td></tr>';
+            }
         }
         async function updateStoryStatus(id, status) {
-            await fetch(`${API_BASE}/placement-stories/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ status }) });
-            loadPlacementStories();
+            try {
+                await authFetch(`${API_BASE}/placement-stories/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+                loadPlacementStories();
+            } catch (err) {
+                console.error('Update story status error:', err);
+            }
         }
         async function deleteStory(id) {
-            if(confirm('Delete story?')) {
-                await fetch(`${API_BASE}/placement-stories/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-                loadPlacementStories();
+            if (confirm('Delete story?')) {
+                try {
+                    await authFetch(`${API_BASE}/placement-stories/${id}`, { method: 'DELETE' });
+                    loadPlacementStories();
+                } catch (err) {
+                    console.error('Delete story error:', err);
+                }
             }
         }
 
@@ -508,9 +588,9 @@
             };
 
             try {
-                const res = await fetch(id ? `${API_BASE}/posts/${id}` : `${API_BASE}/posts`, {
+                const res = await authFetch(id ? `${API_BASE}/posts/${id}` : `${API_BASE}/posts`, {
                     method: id ? 'PUT' : 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
 
@@ -573,8 +653,8 @@
             e.preventDefault();
             const id = document.getElementById('facultyId').value;
             const data = { name: document.getElementById('facultyName').value, designation: document.getElementById('facultyDesignation').value, department: document.getElementById('facultyDept').value, image_url: document.getElementById('facultyImg').value };
-            await fetch(id ? `${API_BASE}/faculties/${id}` : `${API_BASE}/faculties`, {
-                method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            await authFetch(id ? `${API_BASE}/faculties/${id}` : `${API_BASE}/faculties`, {
+                method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
             bootstrap.Modal.getInstance(document.getElementById('facultyModal')).hide();
@@ -615,8 +695,8 @@
             e.preventDefault();
             const id = document.getElementById('courseId').value;
             const data = { name: document.getElementById('courseName').value, department: document.getElementById('courseDept').value, duration: document.getElementById('courseDuration').value, description: document.getElementById('courseDesc').value };
-            await fetch(id ? `${API_BASE}/courses/${id}` : `${API_BASE}/courses`, {
-                method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            await authFetch(id ? `${API_BASE}/courses/${id}` : `${API_BASE}/courses`, {
+                method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
             bootstrap.Modal.getInstance(document.getElementById('courseModal')).hide();
@@ -625,19 +705,13 @@
 
         // Reviews
         async function loadReviews() {
-            const res = await fetch(`${API_BASE}/reviews?all=true`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await authFetch(`${API_BASE}/reviews?all=true`);
             const data = await res.json();
             document.getElementById('reviews-table').innerHTML = data.map(r => `
                 <tr>
                     <td>${r.student_name}</td>
                     <td>${'★'.repeat(r.rating)}</td>
                     <td><small>${r.comment}</small></td>
-                    <td>
-                        <span class="badge ${(r.sentiment_label || 'Neutral') === 'Positive' ? 'bg-success' : ((r.sentiment_label || 'Neutral') === 'Negative' ? 'bg-danger' : 'bg-secondary')}">
-                            <i class="bi bi-${(r.sentiment_label || 'Neutral') === 'Positive' ? 'emoji-smile' : ((r.sentiment_label || 'Neutral') === 'Negative' ? 'emoji-frown' : 'emoji-neutral')} me-1"></i>
-                            ${r.sentiment_label || 'Neutral'} (${r.sentiment_score || 0})
-                        </span>
-                    </td>
                     <td><span class="status-badge status-${r.status.toLowerCase()}">${r.status}</span></td>
                     <td>
                         ${r.status === 'Pending' ? `<button class="btn btn-sm btn-success" onclick="updateReviewStatus(${r.id}, 'Approved')">Approve</button>` : ''}
@@ -647,15 +721,59 @@
             `).join('');
         }
         async function updateReviewStatus(id, status) {
-            await fetch(`${API_BASE}/reviews/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ status }) });
-            loadReviews();
+            try {
+                await authFetch(`${API_BASE}/reviews/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+                loadReviews();
+            } catch (err) {
+                console.error('Update review status error:', err);
+            }
         }
 
         // Deletes & Form Clears
-        async function deleteBlog(id) { if(confirm('Delete post?')) { await fetch(`${API_BASE}/posts/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); loadBlogs(); } }
-        async function deleteFaculty(id) { if(confirm('Delete faculty?')) { await fetch(`${API_BASE}/faculties/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); loadFaculties(); } }
-        async function deleteCourse(id) { if(confirm('Delete course?')) { await fetch(`${API_BASE}/courses/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); loadCourses(); } }
-        async function deleteReview(id) { if(confirm('Delete review?')) { await fetch(`${API_BASE}/reviews/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); loadReviews(); } }
+        async function deleteBlog(id) {
+            if (confirm('Delete post?')) {
+                try {
+                    await authFetch(`${API_BASE}/posts/${id}`, { method: 'DELETE' });
+                    loadBlogs();
+                } catch (err) {
+                    console.error('Delete blog error:', err);
+                }
+            }
+        }
+        async function deleteFaculty(id) {
+            if (confirm('Delete faculty?')) {
+                try {
+                    await authFetch(`${API_BASE}/faculties/${id}`, { method: 'DELETE' });
+                    loadFaculties();
+                } catch (err) {
+                    console.error('Delete faculty error:', err);
+                }
+            }
+        }
+        async function deleteCourse(id) {
+            if (confirm('Delete course?')) {
+                try {
+                    await authFetch(`${API_BASE}/courses/${id}`, { method: 'DELETE' });
+                    loadCourses();
+                } catch (err) {
+                    console.error('Delete course error:', err);
+                }
+            }
+        }
+        async function deleteReview(id) {
+            if (confirm('Delete review?')) {
+                try {
+                    await authFetch(`${API_BASE}/reviews/${id}`, { method: 'DELETE' });
+                    loadReviews();
+                } catch (err) {
+                    console.error('Delete review error:', err);
+                }
+            }
+        }
 
         function clearBlogForm() {
             document.getElementById('blogId').value = '';
@@ -704,7 +822,8 @@
         const storedToken = localStorage.getItem('adminToken');
         if (storedToken) {
             document.getElementById('dashboard-screen').classList.add('active');
-            loadApplications();
+            document.querySelector('.nav-link.active')?.classList.add('active');
+            showSection('applications', document.querySelector('.nav-link.active'));
         } else {
             document.getElementById('login-screen').classList.add('active');
         }
